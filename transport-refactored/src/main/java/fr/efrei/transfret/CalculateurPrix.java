@@ -5,14 +5,6 @@ import java.util.Map;
 
 public class CalculateurPrix {
 
-    private static final double SUPPLEMENT_FRAGILE = 1.15;
-    private static final double SUPPLEMENT_DANGEREUX = 1.30;
-    private static final double SUPPLEMENT_REFRIGERE = 1.20;
-    private static final double SUPPLEMENT_URGENT = 1.5;
-
-    private static final double TAUX_ASSURANCE = 0.02;
-    private static final double MINIMUM_ASSURANCE = 15;
-
     private Map<ModeTransport, TarifTransport> tarifs;
     private Map<TypeClient, PolitiqueRemise> remises;
 
@@ -22,44 +14,35 @@ public class CalculateurPrix {
     }
 
     public double calculerPrixHT(List<Colis> colis, int distance, ModeTransport mode, boolean urgent, boolean assurance, TypeClient typeClient) {
-        double poids = 0;
-        double volume = 0;
-        double valeur = 0;
+        TarifTransport tarif = tarifs.get(mode);
+        if (tarif == null) {
+            throw new IllegalArgumentException("Mode inconnu : " + mode);
+        }
+
         boolean fragile = false;
         boolean dangereux = false;
         boolean refrigere = false;
         for (Colis c : colis) {
-            poids = poids + c.getPoids();
-            volume = volume + c.getVolume();
-            valeur = valeur + c.getValeurDeclaree();
             if (c.getType() == TypeMarchandise.FRAGILE) fragile = true;
             if (c.getType() == TypeMarchandise.DANGEREUX) dangereux = true;
             if (c.getType() == TypeMarchandise.REFRIGERE) refrigere = true;
         }
 
-        TarifTransport tarif = tarifs.get(mode);
-        if (tarif == null) {
-            throw new IllegalArgumentException("Mode inconnu : " + mode);
-        }
-        double prix = tarif.calculerTarifBase(poids, volume, distance);
-
-        // suppléments
-        if (fragile) prix = prix * SUPPLEMENT_FRAGILE;
-        if (dangereux) prix = prix * SUPPLEMENT_DANGEREUX;
-        if (refrigere) prix = prix * SUPPLEMENT_REFRIGERE;
-        if (urgent) prix = prix * SUPPLEMENT_URGENT;
+        CalculPrix calcul = new TarifDeBase(tarif);
+        if (fragile) calcul = new SupplementFragile(calcul);
+        if (dangereux) calcul = new SupplementDangereux(calcul);
+        if (refrigere) calcul = new SupplementRefrigere(calcul);
+        if (urgent) calcul = new SupplementUrgence(calcul);
 
         PolitiqueRemise remise = remises.get(typeClient);
         if (remise != null) {
-            prix = remise.appliquerRemise(prix);
+            calcul = new SupplementRemise(calcul, remise);
         }
 
-        // assurance
         if (assurance) {
-            double montantAssurance = valeur * TAUX_ASSURANCE;
-            if (montantAssurance < MINIMUM_ASSURANCE) montantAssurance = MINIMUM_ASSURANCE;
-            prix = prix + montantAssurance;
+            calcul = new SupplementAssurance(calcul);
         }
-        return Utils.arrondir(prix);
+
+        return Utils.arrondir(calcul.calculer(colis, distance));
     }
 }
