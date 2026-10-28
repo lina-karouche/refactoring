@@ -45,6 +45,7 @@ public class NouveauSystemeAdapter implements SystemeTransport {
         tarifs.put(ModeTransport.RAIL, new TarifRail());
         tarifs.put(ModeTransport.MER, new TarifMer());
         tarifs.put(ModeTransport.AIR, new TarifAir());
+        tarifs.put(ModeTransport.FLUVIAL, new TarifFluvial());
 
         Map<TypeClient, PolitiqueRemise> remises = new HashMap<>();
         remises.put(TypeClient.PARTICULIER, new RemiseParticulier());
