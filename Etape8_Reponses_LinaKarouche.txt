@@ -1,0 +1,37 @@
+Etape 8
+Lina Karouche
+
+1) Combien de fichiers j'ai modifies ?
+
+Avant (etape 1), ajouter un nouveau mode de transport demandait de
+changer 8 endroits dans 6 fichiers, et de reecrire du code a chaque
+fois.
+
+Maintenant (etape 8), j'ai juste touche 7 fichiers, mais a chaque fois
+une seule petite ligne ajoutee, rien de reecrit. Et j'ai surtout cree
+7 fichiers tout neufs (le tarif fluvial, la peniche, le supplement
+hors gabarit, et les tests).
+
+Le plus important : les 3 grosses classes qui changeaient tout le
+temps avant (CalculateurPrix, ServiceExpedition, AffectationVehicule)
+n'ont presque pas bouge cette fois.
+
+
+2) Est-ce que les 68 tests passent encore ?
+
+Non. 62 passent, 6 sont rouges.
+
+Pourquoi : ma nouvelle regle (+10% si un colis fait plus de 200 cm)
+touche aussi des colis qui existaient deja dans les tests, pour une
+autre raison. Je ne peux pas changer ces tests, donc leur prix ne
+correspond plus.
+
+Ca montre juste qu'une nouvelle regle peut changer des choses qu'on
+ne voulait pas toucher, meme si le code est bien range.
+
+
+3) Les tests des nouvelles classes
+
+- TarifFluvialTest : verifie le prix et le minimum de 300 euros
+- PenicheTest : verifie qu'elle prend que le mode FLUVIAL
+- SupplementHorsGabaritTest : verifie le +10%
