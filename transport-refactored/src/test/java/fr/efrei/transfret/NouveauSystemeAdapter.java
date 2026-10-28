@@ -14,7 +14,9 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.stream.Collectors;
@@ -38,8 +40,19 @@ public class NouveauSystemeAdapter implements SystemeTransport {
         smsCanal = new SmsCanal();
         Notificateur notificateur = new Notificateur(emailCanal, smsCanal);
 
+        Map<ModeTransport, TarifTransport> tarifs = new HashMap<>();
+        tarifs.put(ModeTransport.ROUTE, new TarifRoute());
+        tarifs.put(ModeTransport.RAIL, new TarifRail());
+        tarifs.put(ModeTransport.MER, new TarifMer());
+        tarifs.put(ModeTransport.AIR, new TarifAir());
+
+        Map<TypeClient, PolitiqueRemise> remises = new HashMap<>();
+        remises.put(TypeClient.PARTICULIER, new RemiseParticulier());
+        remises.put(TypeClient.ENTREPRISE, new RemiseEntreprise());
+        remises.put(TypeClient.PREMIUM, new RemisePremium());
+
         serviceClient = new ServiceClient(clientRepository, emailCanal);
-        serviceExpedition = new ServiceExpedition(expeditionRepository, new CalculateurPrix(),
+        serviceExpedition = new ServiceExpedition(expeditionRepository, new CalculateurPrix(tarifs, remises),
                 new AffectationVehicule(flotte), new ValidateurExpedition(), new EstimateurDelai(), notificateur);
         generateurFacture = new GenerateurFacture();
     }

@@ -4,7 +4,9 @@ import fr.efrei.transfret.Colis;
 import fr.efrei.transfret.Flotte;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Main {
 
@@ -16,8 +18,19 @@ public class Main {
         CanalNotification canalSms = new SmsCanal();
         Notificateur notificateur = new Notificateur(canalEmail, canalSms);
 
+        Map<ModeTransport, TarifTransport> tarifs = new HashMap<>();
+        tarifs.put(ModeTransport.ROUTE, new TarifRoute());
+        tarifs.put(ModeTransport.RAIL, new TarifRail());
+        tarifs.put(ModeTransport.MER, new TarifMer());
+        tarifs.put(ModeTransport.AIR, new TarifAir());
+
+        Map<TypeClient, PolitiqueRemise> remises = new HashMap<>();
+        remises.put(TypeClient.PARTICULIER, new RemiseParticulier());
+        remises.put(TypeClient.ENTREPRISE, new RemiseEntreprise());
+        remises.put(TypeClient.PREMIUM, new RemisePremium());
+
         ServiceClient serviceClient = new ServiceClient(clientRepository, canalEmail);
-        ServiceExpedition serviceExpedition = new ServiceExpedition(expeditionRepository, new CalculateurPrix(),
+        ServiceExpedition serviceExpedition = new ServiceExpedition(expeditionRepository, new CalculateurPrix(tarifs, remises),
                 new AffectationVehicule(flotte), new ValidateurExpedition(), new EstimateurDelai(), notificateur);
 
         System.out.println("\n----- Clients -----");
