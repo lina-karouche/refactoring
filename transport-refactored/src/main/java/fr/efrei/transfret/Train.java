@@ -1,6 +1,6 @@
 package fr.efrei.transfret;
 
-import fr.efrei.transfret.Vehicule;
+import java.util.List;
 
 public class Train extends Vehicule {
 
@@ -8,28 +8,16 @@ public class Train extends Vehicule {
         super(immatriculation, capaciteMax);
     }
 
-    public void rouler(int km) {
-        System.out.println("Le train " + immatriculation + " circule sur " + km + " km de voies ferrées");
+    public void partir(int distanceKm) {
+        System.out.println("Le train " + immatriculation + " circule sur " + distanceKm + " km de voies ferrées");
     }
 
-    public void naviguer(int milesNautiques) {
-        throw new UnsupportedOperationException("Un train ne navigue pas");
-    }
-
-    public void voler(int altitude) {
-        throw new UnsupportedOperationException("Un train ne vole pas");
-    }
-
-    public void activerRefrigeration(double temperature) {
-        throw new UnsupportedOperationException("Pas de wagons frigorifiques");
-    }
-
-    public boolean peutTransporterMatieresDangereuses() {
-        return true;
+    public boolean peutPrendreEnCharge(List<Colis> colis, ModeTransport mode) {
+        return mode == ModeTransport.RAIL;
     }
 
     @Override
     public void faireLePlein() {
-        throw new UnsupportedOperationException("Un train électrique ne fait pas le plein");
+        System.out.println("Train électrique : pas de plein nécessaire pour " + immatriculation);
     }
 }

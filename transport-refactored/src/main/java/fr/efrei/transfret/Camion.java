@@ -1,5 +1,7 @@
 package fr.efrei.transfret;
 
+import java.util.List;
+
 public class Camion extends Vehicule {
 
     protected boolean adr; // certification matières dangereuses
@@ -9,23 +11,14 @@ public class Camion extends Vehicule {
         this.adr = adr;
     }
 
-    public void rouler(int km) {
-        System.out.println("Le camion " + immatriculation + " roule sur " + km + " km");
+    public void partir(int distanceKm) {
+        System.out.println("Le camion " + immatriculation + " roule sur " + distanceKm + " km");
     }
 
-    public void naviguer(int milesNautiques) {
-        throw new UnsupportedOperationException("Un camion ne navigue pas");
-    }
-
-    public void voler(int altitude) {
-        throw new UnsupportedOperationException("Un camion ne vole pas");
-    }
-
-    public void activerRefrigeration(double temperature) {
-        throw new UnsupportedOperationException("Ce camion n'est pas frigorifique");
-    }
-
-    public boolean peutTransporterMatieresDangereuses() {
-        return adr;
+    public boolean peutPrendreEnCharge(List<Colis> colis, ModeTransport mode) {
+        if (mode != ModeTransport.ROUTE) return false;
+        if (ColisUtils.contient(colis, TypeMarchandise.REFRIGERE)) return false;
+        if (ColisUtils.contient(colis, TypeMarchandise.DANGEREUX) && !adr) return false;
+        return true;
     }
 }
