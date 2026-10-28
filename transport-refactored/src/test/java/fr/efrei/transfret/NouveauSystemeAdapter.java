@@ -9,7 +9,6 @@ import fr.efrei.transport.contrat.EtatExpedition;
 import fr.efrei.transport.contrat.Notification;
 import fr.efrei.transport.contrat.Statut;
 import fr.efrei.transport.contrat.SystemeTransport;
-import fr.efrei.transport.contrat.TypeMarchandise;
 
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
@@ -40,7 +39,7 @@ public class NouveauSystemeAdapter implements SystemeTransport {
 
     @Override
     public Optional<String> creerClient(DemandeClient d) {
-        Client client = serviceClient.creerClient(d.nom(), d.email(), d.telephone(), d.adresse(), d.type().name(), d.siret());
+        Client client = serviceClient.creerClient(d.nom(), d.email(), d.telephone(), d.adresse(), TypeClient.valueOf(d.type().name()), d.siret());
         return Optional.ofNullable(client).map(Client::getEmail);
     }
 
@@ -48,7 +47,7 @@ public class NouveauSystemeAdapter implements SystemeTransport {
     public Optional<String> creerExpedition(DemandeExpedition d) {
         Client client = Database.clients.get(d.refClient());
         Expedition expedition = serviceExpedition.creerExpedition(client, versColis(d.colis()), d.villeDepart(),
-                d.villeArrivee(), d.mode().name(), d.urgent(), d.assurance());
+                d.villeArrivee(), ModeTransport.valueOf(d.mode().name()), d.urgent(), d.assurance());
         return Optional.ofNullable(expedition).map(Expedition::getId);
     }
 
@@ -59,14 +58,14 @@ public class NouveauSystemeAdapter implements SystemeTransport {
             return Optional.empty();
         }
         int delai = (int) ChronoUnit.DAYS.between(jour(e.getDateCreation()), jour(e.getDateLivraisonPrevue()));
-        return Optional.of(new EtatExpedition(e.getId(), Statut.valueOf(e.getStatut()), e.getPrixHT(), e.getPrixTTC(),
+        return Optional.of(new EtatExpedition(e.getId(), Statut.valueOf(e.getStatut().name()), e.getPrixHT(), e.getPrixTTC(),
                 delai, e.getVehicule().getImmatriculation(), e.getFraisAnnulation()));
     }
 
     @Override
     public OptionalDouble devisTTC(DemandeDevis d) {
         double devis = serviceExpedition.calculerDevis(versColis(d.colis()), d.villeDepart(), d.villeArrivee(),
-                d.mode().name(), d.urgent(), d.assurance(), d.typeClient().name());
+                ModeTransport.valueOf(d.mode().name()), d.urgent(), d.assurance(), TypeClient.valueOf(d.typeClient().name()));
         return devis == -1 ? OptionalDouble.empty() : OptionalDouble.of(devis);
     }
 
@@ -112,15 +111,15 @@ public class NouveauSystemeAdapter implements SystemeTransport {
 
     private static Colis versColis(ColisDto c) {
         return new Colis(c.description(), c.poidsKg(), c.longueurCm(), c.largeurCm(), c.hauteurCm(),
-                codeType(c.type()), c.valeurDeclaree());
+                versTypeMarchandise(c.type()), c.valeurDeclaree());
     }
 
-    private static int codeType(TypeMarchandise type) {
+    private static TypeMarchandise versTypeMarchandise(fr.efrei.transport.contrat.TypeMarchandise type) {
         return switch (type) {
-            case STANDARD -> Colis.STANDARD;
-            case FRAGILE -> Colis.FRAGILE;
-            case DANGEREUX -> Colis.DANGEREUX;
-            case REFRIGERE -> Colis.REFRIGERE;
+            case STANDARD -> TypeMarchandise.STANDARD;
+            case FRAGILE -> TypeMarchandise.FRAGILE;
+            case DANGEREUX -> TypeMarchandise.DANGEREUX;
+            case REFRIGERE -> TypeMarchandise.REFRIGERE;
         };
     }
 }
