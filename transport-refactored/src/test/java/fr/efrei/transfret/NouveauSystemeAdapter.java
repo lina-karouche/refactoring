@@ -84,9 +84,11 @@ public class NouveauSystemeAdapter implements SystemeTransport {
         return serviceExpedition.annulerExpedition(id);
     }
 
+    private GenerateurFacture generateurFacture = new GenerateurFacture();
+
     @Override
     public Optional<String> facture(String id) {
-        return Optional.ofNullable(Database.expeditions.get(id)).map(Expedition::genererFacture);
+        return Optional.ofNullable(Database.expeditions.get(id)).map(generateurFacture::genererFacture);
     }
 
     @Override
